@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import com.talas.config.AppConstants;
 import com.talas.dto.LatLng;
 import com.talas.dto.NearbyCrimeDto;
-import com.talas.dto.OrsRoute;
+import com.talas.dto.RoutedPath;
 import com.talas.dto.RouteDto;
 import com.talas.dto.RouteRequest;
 import com.talas.dto.RouteResponse;
@@ -30,7 +30,7 @@ import com.talas.util.GridMath;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Finds a route with ORS, checks it against reported crimes nearby, and when possible suggests
+ * Finds a route with the routing provider, checks it against reported crimes nearby, and when possible suggests
  * a route with fewer reported crimes. Routes are checked against all crimes (no filters).
  */
 @Service
@@ -41,7 +41,7 @@ public class RouteService {
             "Suggestions only. Reported-crime data does not guarantee that any route is free of risk.";
     private static final String NO_ALTERNATIVE = "Could not look up an alternative route.";
 
-    private final OrsClient ors;
+    private final RoutingProvider routing;
     private final CrimeQueries crimeQueries;
     private final HotspotService hotspotService;
 
@@ -56,8 +56,8 @@ public class RouteService {
             throw new IllegalArgumentException("Locations must be within Metro Manila.");
         }
 
-        // The baseline is the route ORS gives by default. If ORS fails here, the user gets a 502.
-        OrsRoute baseline = ors.route(origin, destination, mode, List.of(), false).get(0);
+        // The baseline is the route the routing provider gives by default. If it fails here, the user gets a 502.
+        RoutedPath baseline = routing.route(origin, destination, mode, List.of(), false).get(0);
         List<NearbyCrimeDto> nearby = crimeQueries.findCrimesNearRoute(baseline.lineGeoJson(), buffer);
         int baselineRisk = riskScore(nearby);
 
@@ -72,11 +72,11 @@ public class RouteService {
         warnings.add(baselineRisk + " weighted reported-crime points lie within " + buffer
                 + " m of the fastest route.");
 
-        // Step A: ask ORS for a route that avoids the hotspot squares the baseline passes through
+        // Step A: ask the routing provider for a route that avoids the hotspot squares the baseline passes through
         List<HotspotCell> avoidCells = hotspotsAlongRoute(nearby, origin, destination);
         if (!avoidCells.isEmpty()) {
             try {
-                OrsRoute avoiding = ors.route(origin, destination, mode, avoidCells, false).get(0);
+                RoutedPath avoiding = routing.route(origin, destination, mode, avoidCells, false).get(0);
                 List<NearbyCrimeDto> avoidingNearby =
                         crimeQueries.findCrimesNearRoute(avoiding.lineGeoJson(), buffer);
                 int avoidingRisk = riskScore(avoidingNearby);
@@ -84,16 +84,16 @@ public class RouteService {
                 if (avoidingRisk < baselineRisk && withinDetourLimit(avoiding, baseline)) {
                     routes.add(toRouteDto("Avoids reported hotspots", avoiding, avoidingNearby, avoidingRisk));
                 }
-            } catch (OrsUnavailableException e) {
+            } catch (RoutingUnavailableException e) {
                 warnings.add(NO_ALTERNATIVE);
             }
         }
 
-        // Step B (fallback): if Step A added nothing, ask ORS for alternative routes and keep the best one
+        // Step B (fallback): if Step A added nothing, ask for alternative routes and keep the best one
         if (routes.size() == 1) {
             try {
                 RouteDto best = null;
-                for (OrsRoute alternative : ors.route(origin, destination, mode, List.of(), true)) {
+                for (RoutedPath alternative : routing.route(origin, destination, mode, List.of(), true)) {
                     List<NearbyCrimeDto> altNearby =
                             crimeQueries.findCrimesNearRoute(alternative.lineGeoJson(), buffer);
                     int altRisk = riskScore(altNearby);
@@ -107,7 +107,7 @@ public class RouteService {
                 if (best != null) {
                     routes.add(best);
                 }
-            } catch (OrsUnavailableException e) {
+            } catch (RoutingUnavailableException e) {
                 if (!warnings.contains(NO_ALTERNATIVE)) {
                     warnings.add(NO_ALTERNATIVE);
                 }
@@ -126,7 +126,7 @@ public class RouteService {
         return score;
     }
 
-    private static boolean withinDetourLimit(OrsRoute candidate, OrsRoute baseline) {
+    private static boolean withinDetourLimit(RoutedPath candidate, RoutedPath baseline) {
         return candidate.durationS() <= MAX_DETOUR_FACTOR * baseline.durationS();
     }
 
@@ -179,7 +179,7 @@ public class RouteService {
         return best;
     }
 
-    private static RouteDto toRouteDto(String label, OrsRoute route, List<NearbyCrimeDto> nearby, int risk) {
+    private static RouteDto toRouteDto(String label, RoutedPath route, List<NearbyCrimeDto> nearby, int risk) {
         double distanceKm = Math.round(route.distanceM() / 100.0) / 10.0;   // 1 decimal
         long durationMin = Math.round(route.durationS() / 60.0);
         // nearby is already sorted closest first; only the first MAX_NEARBY_CRIMES are listed

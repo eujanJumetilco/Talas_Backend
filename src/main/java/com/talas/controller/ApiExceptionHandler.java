@@ -14,7 +14,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.talas.dto.ApiError;
 import com.talas.service.NotFoundException;
-import com.talas.service.OrsUnavailableException;
+import com.talas.service.RoutingUnavailableException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,8 +75,8 @@ public class ApiExceptionHandler {
         return error(HttpStatus.METHOD_NOT_ALLOWED, "Method not allowed.");
     }
 
-    @ExceptionHandler(OrsUnavailableException.class)
-    public ResponseEntity<ApiError> orsDown(OrsUnavailableException ex) {
+    @ExceptionHandler(RoutingUnavailableException.class)
+    public ResponseEntity<ApiError> providerDown(RoutingUnavailableException ex) {
         return error(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 

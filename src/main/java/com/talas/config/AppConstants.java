@@ -21,7 +21,7 @@ public final class AppConstants {
     /** Accept a different route only if it takes at most 1.5x the baseline duration. */
     public static final double MAX_DETOUR_FACTOR = 1.5;
 
-    /** Max hotspot squares sent to ORS per request. */
+    /** Max hotspot squares sent to the routing provider per request. */
     public static final int MAX_AVOID_CELLS = 50;
 
     /** Max crimes listed per route in the response. */

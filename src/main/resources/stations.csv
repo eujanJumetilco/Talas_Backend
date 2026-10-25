@@ -1,1 +1,41 @@
 address,contact_number,latitude,longitude
+"Sample Station 1 (mock data), Quiapo, Manila",0000-000-0001,14.598943,120.984333
+"Sample Station 2 (mock data), Divisoria, Manila",0000-000-0002,14.606465,120.971992
+"Sample Station 3 (mock data), Sampaloc, Manila",0000-000-0003,14.604946,120.984464
+"Sample Station 4 (mock data), Tondo, Manila",0000-000-0004,14.615394,120.972635
+"Sample Station 5 (mock data), Santa Cruz, Manila",0000-000-0005,14.604489,120.979915
+"Sample Station 6 (mock data), Binondo, Manila",0000-000-0006,14.597887,120.975745
+"Sample Station 7 (mock data), Cubao, Quezon City",0000-000-0007,14.621126,121.053069
+"Sample Station 8 (mock data), Bagong Pag-asa, Quezon City",0000-000-0008,14.657412,121.028926
+"Sample Station 9 (mock data), South Triangle, Quezon City",0000-000-0009,14.632639,121.036783
+"Sample Station 10 (mock data), Batasan Hills, Quezon City",0000-000-0010,14.69067,121.097259
+"Sample Station 11 (mock data), Fairview, Quezon City",0000-000-0011,14.735198,121.059055
+"Sample Station 12 (mock data), Novaliches, Quezon City",0000-000-0012,14.721636,121.043461
+"Sample Station 13 (mock data), Diliman, Quezon City",0000-000-0013,14.656078,121.053762
+"Sample Station 14 (mock data), Monumento, Caloocan",0000-000-0014,14.652157,120.985697
+"Sample Station 15 (mock data), Grace Park, Caloocan",,14.644082,120.986731
+"Sample Station 16 (mock data), Camarin, Caloocan",0000-000-0016,14.750192,121.040859
+"Sample Station 17 (mock data), Legaspi Village, Makati",0000-000-0017,14.556963,121.026353
+"Sample Station 18 (mock data), Poblacion, Makati",0000-000-0018,14.566354,121.032873
+"Sample Station 19 (mock data), Guadalupe Nuevo, Makati",0000-000-0019,14.566423,121.045792
+"Sample Station 20 (mock data), San Antonio, Pasig",0000-000-0020,14.58937,121.06277
+"Sample Station 21 (mock data), Malinao, Pasig",0000-000-0021,14.560146,121.08213
+"Sample Station 22 (mock data), Fort Bonifacio, Taguig",0000-000-0022,14.549253,121.048922
+"Sample Station 23 (mock data), Signal Village, Taguig",0000-000-0023,14.510526,121.054648
+"Sample Station 24 (mock data), Baclaran, Parañaque",0000-000-0024,14.531155,120.995481
+"Sample Station 25 (mock data), San Dionisio, Parañaque",0000-000-0025,14.484982,121.010975
+"Sample Station 26 (mock data), Pasay Rotonda, Pasay",0000-000-0026,14.536431,120.998678
+"Sample Station 27 (mock data), Libertad, Pasay",0000-000-0027,14.546388,120.997037
+"Sample Station 28 (mock data), Almanza Uno, Las Piñas",0000-000-0028,14.432141,121.011006
+"Sample Station 29 (mock data), Pamplona, Las Piñas",0000-000-0029,14.456679,120.992868
+"Sample Station 30 (mock data), Alabang, Muntinlupa",,14.42084,121.034587
+"Sample Station 31 (mock data), Putatan, Muntinlupa",0000-000-0031,14.399609,121.042016
+"Sample Station 32 (mock data), Santa Elena, Marikina",0000-000-0032,14.632184,121.098287
+"Sample Station 33 (mock data), Concepcion Uno, Marikina",0000-000-0033,14.652394,121.101972
+"Sample Station 34 (mock data), Marulas, Valenzuela",0000-000-0034,14.678524,120.985482
+"Sample Station 35 (mock data), Karuhatan, Valenzuela",0000-000-0035,14.686818,120.98054
+"Sample Station 36 (mock data), Wack-Wack, Mandaluyong",0000-000-0036,14.582485,121.051301
+"Sample Station 37 (mock data), Greenhills, San Juan",0000-000-0037,14.605932,121.045913
+"Sample Station 38 (mock data), Concepcion, Malabon",0000-000-0038,14.665177,120.957603
+"Sample Station 39 (mock data), Navotas",0000-000-0039,14.664678,120.941222
+"Sample Station 40 (mock data), Poblacion, Pateros",0000-000-0040,14.545149,121.069163

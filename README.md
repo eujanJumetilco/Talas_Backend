@@ -2,7 +2,7 @@
 
 Spring Boot API for **Talas**, a crime-awareness and route-information system for Metro Manila
 (CIT 202 Data Structures and Algorithms final project). It serves crimes, statistics, hotspots and
-police stations from PostgreSQL + PostGIS, and proxies geocoding and routing to OpenRouteService (ORS).
+police stations from PostgreSQL + PostGIS, and proxies geocoding and routing to an external provider (GraphHopper or OpenRouteService, your choice per feature).
 
 > **Time zones:** the backend works **only in UTC**. Timestamps are stored, filtered, counted and returned
 > in UTC (ending in `Z`). The frontend converts everything to Philippine time (UTC+8) for display.
@@ -13,7 +13,7 @@ police stations from PostgreSQL + PostGIS, and proxies geocoding and routing to 
 
 - Java 17 or newer (Maven is included as the wrapper `./mvnw`)
 - A PostgreSQL database with PostGIS (we use [Neon](https://neon.tech), free tier)
-- An [OpenRouteService](https://openrouteservice.org/dev/#/signup) API key (free) for geocoding and routing
+- An API key for each provider you use: [GraphHopper](https://www.graphhopper.com/) and/or [OpenRouteService](https://openrouteservice.org/dev/#/signup) (free tiers)
 
 ## 1. Create the database
 
@@ -32,10 +32,16 @@ Spring never creates or changes tables (`ddl-auto=none`).
 | `DB_URL` | JDBC URL: `jdbc:postgresql://<neon-host>/<dbname>?sslmode=require&reWriteBatchedInserts=true` |
 | `DB_USER` | Neon user |
 | `DB_PASSWORD` | Neon password |
-| `ORS_API_KEY` | OpenRouteService API key. Without it the app still starts, but `/api/geocode` and `/api/routes/safe` return 502. |
+| `GEOCODING_PROVIDER` | Who answers `/api/geocode`: `graphhopper` (default) or `ors` |
+| `ROUTING_PROVIDER` | Who answers `/api/routes/safe`: `graphhopper` (default) or `ors` |
+| `GRAPHHOPPER_API_KEY` | GraphHopper API key. Needed when either provider above is `graphhopper`. |
+| `ORS_API_KEY` | OpenRouteService API key. Needed when either provider above is `ors`. |
 | `ALLOWED_ORIGIN` | The frontend's address for CORS. Default `http://localhost:3000` |
 
 `reWriteBatchedInserts=true` makes the CSV import much faster. Never commit these values.
+
+The two providers are chosen separately, so you can mix them (for example geocoding with ORS and routing
+with GraphHopper). Without the matching key the app still starts, but that feature returns 502.
 
 Example (Linux/macOS):
 
@@ -43,7 +49,9 @@ Example (Linux/macOS):
 export DB_URL="jdbc:postgresql://ep-xxxx.ap-southeast-1.aws.neon.tech/talas?sslmode=require&reWriteBatchedInserts=true"
 export DB_USER="..."
 export DB_PASSWORD="..."
-export ORS_API_KEY="..."
+export GRAPHHOPPER_API_KEY="..."
+export ROUTING_PROVIDER=graphhopper   # or ors
+export GEOCODING_PROVIDER=graphhopper  # or ors
 ```
 
 ## 3. The crime dataset: `data/crimes.csv`
@@ -93,7 +101,17 @@ address,contact_number,latitude,longitude
 ```
 
 The address should include the station's name. Stations are imported on startup only if the
-`police_station` table is empty. The file ships with just the header: fill it with real, verified station data.
+`police_station` table is empty.
+
+**The file currently holds 40 MOCK stations** ("Sample Station N (mock data), …", placeholder numbers
+`0000-000-NNNN`), made by `../mock_data/generate_mock_data.py`. They are not real police stations. Replace them
+with real, verified station data before presenting the app as anything other than a demo.
+
+## Mock data
+
+`../mock_data/generate_mock_data.py` writes ~5,000 mock crimes to `data/crimes.csv` and the 40 mock stations to
+`src/main/resources/stations.csv`, all inside Metro Manila (see `../mock_data/README.md`). The importers load them
+on the next start when the tables are empty.
 
 ## 5. Run
 
@@ -112,7 +130,7 @@ To see the hotspot tuning numbers (squares, weight percentiles, threshold) in th
 ## Endpoints
 
 All under `/api`, JSON only. Coordinates are `lat`/`lng` (or `[lat, lng]` pairs). Errors are
-`{ "message": "..." }` with a normal HTTP status (400 bad input, 404 not found, 502 ORS unavailable).
+`{ "message": "..." }` with a normal HTTP status (400 bad input, 404 not found, 502 routing/geocoding provider unavailable).
 
 | Method | Path | Purpose |
 | --- | --- | --- |
@@ -124,7 +142,7 @@ All under `/api`, JSON only. Coordinates are `lat`/`lng` (or `[lat, lng]` pairs)
 | GET | `/api/hotspots` | Hotspot grid squares computed from all crimes, highest weight first |
 | GET | `/api/stations` | All police stations |
 | GET | `/api/stations/nearby?lat=&lng=&radiusKm=2` | Stations near a point, closest first |
-| GET | `/api/geocode?q=Cubao` | Up to 5 places in Metro Manila (via ORS) |
+| GET | `/api/geocode?q=Cubao` | Up to 5 places in Metro Manila (via the geocoding provider) |
 | POST | `/api/routes/safe` | Fastest route plus, when possible, an option with fewer reported crimes nearby |
 
 Filters for `/api/crimes` and `/api/stats` (all optional): `area` (address contains, case-insensitive),
